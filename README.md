@@ -257,7 +257,7 @@ REMOTE_PATH="SEU_REMOTO:/SEU_DIRETORIO_REMOTO"   # Caminho do remoto configurado
 
 Altere para o seu remoto e pasta, por exemplo:
 ```bash
-REMOTE_PATH="meugdrive:/Backups Servidor"         # Caminho do remoto configurado no rclone
+REMOTE_PATH="gdrive:/Backups Servidor"         # Caminho do remoto configurado no rclone
 ```
 
 > [!IMPORTANT]
@@ -296,7 +296,7 @@ No `nano`, pressione:
 | `DIRETORIO_LOCAL` (normal) | `SEU_DIRETORIO_DOWNLOADS` | `/home/john/downloads/geral` |
 | `DIRETORIO_LOCAL` (modos) | (outros caminhos) | `/home/john/downloads/filmes`, `/home/john/downloads/musicas` |
 | `MODO_X_SUFIXO` | `MODO_X` | `filmes` (para o comando `gdrive-filmes`) |
-| `REMOTE_PATH` | `SEU_REMOTO:/SEU_DIRETORIO_REMOTO` | `meugdrive:/Backups Servidor` |
+| `REMOTE_PATH` | `SEU_REMOTO:/SEU_DIRETORIO_REMOTO` | `gdrive:/Backups Servidor` |
 | `LABEL_SERVIDOR` | `Servidor` | `Servidor (Home)` |
 
 ### Verificar a configuração
@@ -318,7 +318,7 @@ Isso exibirá um painel com o modo ativo, diretórios e parâmetros do rclone.
 Ao executar o comando sem argumentos, **todo o conteúdo** da pasta configurada no remoto (`REMOTE_PATH`) será transferido para o diretório local equivalente ao modo do comando. Por exemplo, `gdrive` transfere para `DIRETORIO_1`, `gdrive-filmes` para `DIRETORIO_2`, etc.
 
 ```bash
-# Baixar todo o conteúdo da nuvem para o diretório local do modo padrão
+# Baixar todo o conteúdo do Google Drive para o diretório local do modo padrão
 gdrive
 
 # Baixar usando um modo alternativo (ex: filmes)
@@ -617,7 +617,7 @@ REMOTE_PATH="SEU_REMOTO:/SEU_DIRETORIO_REMOTO"   # Caminho do remoto configurado
 
 Altere para o seu remoto e pasta, por exemplo:
 ```bash
-REMOTE_PATH="meugdrive:/Backups Servidor"         # Caminho do remoto configurado no rclone
+REMOTE_PATH="gdrive:/Backups Servidor"         # Caminho do remoto configurado no rclone
 ```
 
 > [!IMPORTANT]
@@ -656,7 +656,7 @@ No `nano`, pressione:
 | `DIRETORIO_LOCAL` (normal) | `SEU_DIRETORIO_DOWNLOADS` | `/home/john/downloads/geral` |
 | `DIRETORIO_LOCAL` (modos) | (outros caminhos) | `/home/john/downloads/filmes`, `/home/john/downloads/musicas` |
 | `MODO_X_SUFIXO` | `MODO_X` | `filmes` (para o comando `gdrive-filmes`) |
-| `REMOTE_PATH` | `SEU_REMOTO:/SEU_DIRETORIO_REMOTO` | `meugdrive:/Backups Servidor` |
+| `REMOTE_PATH` | `SEU_REMOTO:/SEU_DIRETORIO_REMOTO` | `gdrive:/Backups Servidor` |
 | `LABEL_SERVIDOR` | `Servidor` | `Servidor (Home)` |
 
 ### Verificar a configuração
@@ -678,7 +678,7 @@ Isso exibirá um painel com o modo ativo, diretórios e parâmetros do rclone.
 Ao executar o comando sem argumentos, **todo o conteúdo** da pasta configurada no remoto (`REMOTE_PATH`) será transferido para o diretório local equivalente ao modo do comando. Por exemplo, `gdrive` transfere para `DIRETORIO_1`, `gdrive-filmes` para `DIRETORIO_2`, etc.
 
 ```bash
-# Baixar todo o conteúdo da nuvem para o diretório local do modo padrão
+# Baixar todo o conteúdo do Google Drive para o diretório local do modo padrão
 gdrive
 
 # Baixar usando um modo alternativo (ex: filmes)
