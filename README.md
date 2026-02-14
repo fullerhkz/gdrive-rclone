@@ -192,40 +192,59 @@ USUARIO="joao"
 
 ### Passo 3 — Configure os diretórios locais
 
-Localize as linhas com `DIRETORIO_LOCAL` e substitua pelos caminhos reais dos seus diretórios de download:
+O script suporta até 3 diretórios, cada um ativado por um comando/symlink diferente:
 
-**Modo NORMAL** — diretório padrão de downloads:
+**Diretório 1** — modo padrão (comando: `gdrive`):
 No script você encontrará:
 ```bash
-DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS"
+DIRETORIO_1="/home/SEU_USUARIO/SEU_DIRETORIO_1"
 ```
 
 Altere para o caminho real, por exemplo:
 ```bash
-DIRETORIO_LOCAL="/home/joao/downloads/geral"
+DIRETORIO_1="/home/joao/downloads/geral"
 ```
 
-**Modo RIP** (dentro do bloco `if [[ "$CHAMADA" == *"rip"* ]]`):
+**Diretório 2** — modo alternativo (comando: `gdrive-MODO_2`):
 No script você encontrará:
 ```bash
-DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS_RIP"
+DIRETORIO_2="/home/SEU_USUARIO/SEU_DIRETORIO_2"
+MODO_2_SUFIXO="MODO_2"
+MODO_2_LABEL="MODO 2"
 ```
 
-Altere para o caminho real, por exemplo:
+Altere o path e o sufixo, por exemplo:
 ```bash
-DIRETORIO_LOCAL="/home/joao/downloads/rips"
+DIRETORIO_2="/home/joao/downloads/secundario"
+MODO_2_SUFIXO="sec"
+MODO_2_LABEL="SECUNDÁRIO"
+```
+Depois crie o symlink:
+```bash
+sudo ln -s /usr/local/bin/gdrive /usr/local/bin/gdrive-sec
 ```
 
-**Modo PERMANENTE** (dentro do bloco `elif [[ "$CHAMADA" == *"perma"* ]]`):
+**Diretório 3** — modo alternativo (comando: `gdrive-MODO_3`):
 No script você encontrará:
 ```bash
-DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS_PERMANENTE"
+DIRETORIO_3="/home/SEU_USUARIO/SEU_DIRETORIO_3"
+MODO_3_SUFIXO="MODO_3"
+MODO_3_LABEL="MODO 3"
 ```
 
-Altere para o caminho real, por exemplo:
+Altere o path e o sufixo, por exemplo:
 ```bash
-DIRETORIO_LOCAL="/home/joao/downloads/permanente"
+DIRETORIO_3="/home/joao/downloads/permanente"
+MODO_3_SUFIXO="perm"
+MODO_3_LABEL="PERMANENTE"
 ```
+Depois crie o symlink:
+```bash
+sudo ln -s /usr/local/bin/gdrive /usr/local/bin/gdrive-perm
+```
+
+> [!TIP]
+> Os campos `MODO_X_ICONE` e `MODO_X_COR` são opcionais — personalizam o ícone e a cor exibidos na interface do terminal.
 
 ### Passo 4 — Configure o remoto do rclone
 
