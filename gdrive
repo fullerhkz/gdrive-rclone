@@ -1,0 +1,427 @@
+#!/bin/bash
+# ╔═══════════════════════════════════════════════════════════════════════╗
+# ║                    FULLER SYNC MANAGER — gdrive                      ║
+# ║                                                                      ║
+# ║  Script unificado para sincronização de arquivos entre o servidor    ║
+# ║  local e o Google Drive usando rclone.                               ║
+# ║                                                                      ║
+# ║  MODOS DE OPERAÇÃO (detectados pelo nome do executável/symlink):     ║
+# ║    • gdrive       → Modo NORMAL   (dir: SEU_DIRETORIO)              ║
+# ║    • gdrive-rip   → Modo RIP      (dir: SEU_DIRETORIO-rip)          ║
+# ║    • gdrive-perma → Modo PERMA    (dir: SEU_DIRETORIO_PERMANENTE)   ║
+# ║                                                                      ║
+# ║  USO:                                                                ║
+# ║    gdrive                    Baixar arquivos da nuvem → servidor     ║
+# ║    gdrive up "arquivo"       Enviar arquivo/pasta → nuvem            ║
+# ║    gdrive help               Exibir ajuda completa                   ║
+# ║    gdrive status             Exibir configuração ativa               ║
+# ║                                                                      ║
+# ║  NOTA: Para os modos RIP e PERMA, crie symlinks apontando para      ║
+# ║        este script:                                                  ║
+# ║          ln -s /caminho/gdrive /caminho/gdrive-rip                   ║
+# ║          ln -s /caminho/gdrive /caminho/gdrive-perma                 ║
+# ╚═══════════════════════════════════════════════════════════════════════╝
+
+# ─────────────────────────────────────────────────────────────────────────
+# SEGURANÇA: Se executado como root, re-executa como o usuário definido
+# para garantir as permissões corretas de arquivo e evitar problemas
+# com o rclone rodando como root.
+# ─────────────────────────────────────────────────────────────────────────
+USUARIO="SEU_USUARIO"
+
+if [[ "$(id -u)" -eq 0 ]]; then
+    SCRIPT_PATH="$(readlink -f "$0")"
+    exec sudo -u "$USUARIO" -H bash "$SCRIPT_PATH" "$@"
+fi
+
+# ─────────────────────────────────────────────────────────────────────────
+# PALETA DE CORES — Códigos ANSI para saída colorida no terminal
+#
+#   Cores bases usam código 0;XX (normal) e 1;XX (negrito).
+#   Cores 256 (38;5;NNN) são usadas para o gradiente do banner.
+#   Reset (Z) retorna ao padrão do terminal.
+# ─────────────────────────────────────────────────────────────────────────
+Z='\033[0m'           # Reset — volta ao padrão do terminal
+R='\033[0;31m'        # Vermelho — erros
+G='\033[0;32m'        # Verde — sucesso
+Y='\033[0;33m'        # Amarelo — avisos
+B='\033[0;34m'        # Azul — separadores
+C='\033[0;36m'        # Ciano — informações secundárias
+M='\033[0;35m'        # Magenta — destaques extras
+
+BR='\033[1;31m'       # Vermelho Negrito — erros críticos
+BG='\033[1;32m'       # Verde Negrito — sucesso destaque
+BY='\033[1;33m'       # Amarelo Negrito — avisos destaque
+BB='\033[1;34m'       # Azul Negrito — títulos
+BC='\033[1;36m'       # Ciano Negrito — comandos/exemplos
+BM='\033[1;35m'       # Magenta Negrito — modo/ícones
+BW='\033[1;37m'       # Branco Negrito — labels de campo
+
+DIM='\033[2m'         # Dim — texto de baixa prioridade
+
+# Cores 256-color para o gradiente do banner (azul → ciano → verde)
+C1='\033[38;5;27m'    # Azul profundo
+C2='\033[38;5;33m'    # Azul médio
+C3='\033[38;5;39m'    # Azul claro
+C4='\033[38;5;44m'    # Azul-ciano
+C5='\033[38;5;49m'    # Ciano
+C6='\033[38;5;50m'    # Ciano-verde
+C7='\033[38;5;43m'    # Verde-ciano
+
+# ─────────────────────────────────────────────────────────────────────────
+# DETECÇÃO DE MODO — Baseado no nome do executável (basename $0)
+#
+# Permite usar um único script com symlinks para diferentes diretórios:
+#   • "rip"  no nome → modo RIP  (diretório alternativo)
+#   • "perma" no nome → modo PERMANENTE (diretório permanente)
+#   • qualquer outro  → modo NORMAL (diretório padrão)
+# ─────────────────────────────────────────────────────────────────────────
+CHAMADA=$(basename "$0")
+DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS"
+MODO_NOME="NORMAL"
+ICONE_MODO="📀"
+COR_MODO="$BC"
+
+if [[ "$CHAMADA" == *"rip"* ]]; then
+    DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS_RIP"
+    MODO_NOME="RIP"
+    ICONE_MODO="💀"
+    COR_MODO="$BR"
+elif [[ "$CHAMADA" == *"perma"* ]]; then
+    DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS_PERMANENTE"
+    MODO_NOME="PERMANENTE"
+    ICONE_MODO="💎"
+    COR_MODO="$BM"
+fi
+
+# ─────────────────────────────────────────────────────────────────────────
+# CONFIGURAÇÃO DO RCLONE — Remoto e Labels de exibição
+# ─────────────────────────────────────────────────────────────────────────
+REMOTE_PATH="SEU_REMOTO:/SEU_DIRETORIO_REMOTO"   # Caminho do remoto configurado no rclone
+LABEL_REMOTO="Google Drive"                       # Label exibido na interface para a nuvem
+LABEL_SERVIDOR="Servidor"                         # Label exibido na interface para o local
+
+# ─────────────────────────────────────────────────────────────────────────
+# PERMISSÕES — umask 002 garante que arquivos criados tenham permissão
+# rw-rw-r-- (664) e diretórios rwxrwxr-x (775), permitindo acesso do
+# grupo sem abrir para "others".
+# ─────────────────────────────────────────────────────────────────────────
+umask 002
+
+# ─────────────────────────────────────────────────────────────────────────
+# TIMESTAMP — Marca o início da execução para calcular duração total
+# ─────────────────────────────────────────────────────────────────────────
+INICIO_EPOCH=$(date +%s)
+
+# ╔═══════════════════════════════════════════════════════════════════════╗
+# ║                       FUNÇÕES DE INTERFACE                           ║
+# ╚═══════════════════════════════════════════════════════════════════════╝
+
+# ─────────────────────────────────────────────────────────────────────────
+# banner()
+#   Exibe o banner principal do script com gradiente de cores ASCII.
+#   Chamada no início da execução para identificar visualmente o modo.
+# ─────────────────────────────────────────────────────────────────────────
+banner() {
+    clear
+    echo ""
+    echo -e "  ${C1}╔═══════════════════════════════════════════════════════════╗${Z}"
+    echo -e "  ${C2}║                                                           ║${Z}"
+    echo -e "  ${C3}║   ███████╗██╗   ██╗██╗     ██╗     ███████╗██████╗        ║${Z}"
+    echo -e "  ${C4}║   ██╔════╝██║   ██║██║     ██║     ██╔════╝██╔══██╗       ║${Z}"
+    echo -e "  ${C5}║   █████╗  ██║   ██║██║     ██║     █████╗  ██████╔╝       ║${Z}"
+    echo -e "  ${C4}║   ██╔══╝  ██║   ██║██║     ██║     ██╔══╝  ██╔══██╗       ║${Z}"
+    echo -e "  ${C3}║   ██║     ╚██████╔╝███████╗███████╗███████╗██║  ██║       ║${Z}"
+    echo -e "  ${C2}║   ╚═╝      ╚═════╝ ╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝       ║${Z}"
+    echo -e "  ${C1}║                                                           ║${Z}"
+    echo -e "  ${C6}║          ${BW}S Y N C   M A N A G E R${Z}  ${C6}v2.0                    ║${Z}"
+    echo -e "  ${C7}╚═══════════════════════════════════════════════════════════╝${Z}"
+    echo ""
+    echo -e "  ${DIM}$(date '+%d/%m/%Y %H:%M:%S')${Z}  │  ${BW}Usuário:${Z} ${C}$(whoami)${Z}  │  ${BW}Modo:${Z} ${COR_MODO}${MODO_NOME} ${ICONE_MODO}${Z}"
+    echo -e "  ${B}───────────────────────────────────────────────────────────${Z}"
+    echo ""
+}
+
+# ─────────────────────────────────────────────────────────────────────────
+# separador()
+#   Imprime uma linha separadora estilizada para organizar a saída.
+# ─────────────────────────────────────────────────────────────────────────
+separador() {
+    echo -e "  ${B}═══════════════════════════════════════════════════════════${Z}"
+}
+
+# ─────────────────────────────────────────────────────────────────────────
+# info_operacao(acao, origem, destino, mensagem)
+#   Exibe um painel informativo antes de iniciar uma operação de
+#   transferência. Mostra a operação, origem, destino e uma mensagem
+#   de status.
+#
+#   Parâmetros:
+#     $1 — Nome da operação (ex: "UPLOAD", "DOWNLOAD")
+#     $2 — Descrição da origem (com ícone)
+#     $3 — Descrição do destino (com ícone)
+#     $4 — Mensagem de status a exibir
+# ─────────────────────────────────────────────────────────────────────────
+info_operacao() {
+    local acao="$1"
+    local origem="$2"
+    local destino="$3"
+    local mensagem="$4"
+
+    echo -e "  ${BW}┌─ Operação ──────────────────────────────────────────────${Z}"
+    echo -e "  ${BW}│${Z}  ${BG}▶ $acao${Z}"
+    echo -e "  ${BW}│${Z}"
+    echo -e "  ${BW}│${Z}  ${BW}Origem :${Z}  $origem"
+    echo -e "  ${BW}│${Z}  ${BW}Destino:${Z}  $destino"
+    echo -e "  ${BW}│${Z}"
+    echo -e "  ${BW}│${Z}  ${C}⟫ $mensagem${Z}"
+    echo -e "  ${BW}└──────────────────────────────────────────────────────────${Z}"
+    echo ""
+}
+
+# ─────────────────────────────────────────────────────────────────────────
+# msg_sucesso()
+#   Exibe mensagem de conclusão com tempo total de execução.
+#   Calcula a diferença entre o epoch de início e o momento atual.
+# ─────────────────────────────────────────────────────────────────────────
+msg_sucesso() {
+    local fim_epoch
+    fim_epoch=$(date +%s)
+    local duracao=$(( fim_epoch - INICIO_EPOCH ))
+
+    # Converte segundos em formato legível (Xm Ys)
+    local minutos=$(( duracao / 60 ))
+    local segundos=$(( duracao % 60 ))
+    local tempo_fmt
+
+    if [[ $minutos -gt 0 ]]; then
+        tempo_fmt="${minutos}m ${segundos}s"
+    else
+        tempo_fmt="${segundos}s"
+    fi
+
+    echo ""
+    separador
+    echo -e "  ${BG}✅ Transferência concluída com sucesso!${Z}"
+    echo -e "  ${DIM}⏱  Duração total: ${tempo_fmt}${Z}"
+    separador
+    echo ""
+}
+
+# ─────────────────────────────────────────────────────────────────────────
+# msg_erro(mensagem)
+#   Exibe mensagem de erro formatada e encerra o script com código 1.
+#
+#   Parâmetros:
+#     $1 — Mensagem de erro a exibir
+# ─────────────────────────────────────────────────────────────────────────
+msg_erro() {
+    echo ""
+    echo -e "  ${BR}╔══ ERRO ═══════════════════════════════════════════════════╗${Z}"
+    echo -e "  ${BR}║${Z}  ${R}❌ $1${Z}"
+    echo -e "  ${BR}╚══════════════════════════════════════════════════════════╝${Z}"
+    echo ""
+    exit 1
+}
+
+# ─────────────────────────────────────────────────────────────────────────
+# exibir_ajuda()
+#   Mostra a tela de ajuda com todos os comandos, modos e exemplos.
+# ─────────────────────────────────────────────────────────────────────────
+exibir_ajuda() {
+    banner
+    echo -e "  ${BW}USO:${Z}"
+    echo -e "    ${BC}$CHAMADA${Z}                         ${DIM}# Download: Nuvem → Servidor${Z}"
+    echo -e "    ${BC}$CHAMADA up \"arquivo ou pasta\"${Z}   ${DIM}# Upload: Servidor → Nuvem${Z}"
+    echo -e "    ${BC}$CHAMADA help${Z}                     ${DIM}# Exibir esta ajuda${Z}"
+    echo -e "    ${BC}$CHAMADA status${Z}                   ${DIM}# Exibir configuração ativa${Z}"
+    echo ""
+    separador
+    echo ""
+    echo -e "  ${BW}MODOS DISPONÍVEIS:${Z}"
+    echo -e "    ${BC}gdrive${Z}        ${DIM}→${Z}  Modo ${BC}NORMAL${Z}      📀  ${DIM}(dir: padrão)${Z}"
+    echo -e "    ${BC}gdrive-rip${Z}    ${DIM}→${Z}  Modo ${BR}RIP${Z}         💀  ${DIM}(dir: rip)${Z}"
+    echo -e "    ${BC}gdrive-perma${Z}  ${DIM}→${Z}  Modo ${BM}PERMANENTE${Z}  💎  ${DIM}(dir: permanente)${Z}"
+    echo ""
+    echo -e "  ${DIM}O modo é detectado automaticamente pelo nome do executável.${Z}"
+    echo -e "  ${DIM}Use symlinks para os modos alternativos:${Z}"
+    echo -e "    ${DIM}ln -s /caminho/gdrive /caminho/gdrive-rip${Z}"
+    echo -e "    ${DIM}ln -s /caminho/gdrive /caminho/gdrive-perma${Z}"
+    echo ""
+    separador
+    echo ""
+    echo -e "  ${BW}EXEMPLOS:${Z}"
+    echo -e "    ${C}# Baixar tudo da nuvem para o servidor (modo normal)${Z}"
+    echo -e "    ${BC}\$ gdrive${Z}"
+    echo ""
+    echo -e "    ${C}# Enviar um arquivo para a nuvem${Z}"
+    echo -e "    ${BC}\$ gdrive up \"Filme.2024.1080p.mkv\"${Z}"
+    echo ""
+    echo -e "    ${C}# Enviar uma pasta inteira para a nuvem${Z}"
+    echo -e "    ${BC}\$ gdrive up \"Nome da Pasta\"${Z}"
+    echo ""
+    echo -e "    ${C}# Upload no modo permanente (via symlink)${Z}"
+    echo -e "    ${BC}\$ gdrive-perma up \"Álbum Completo\"${Z}"
+    echo ""
+    exit 0
+}
+
+# ─────────────────────────────────────────────────────────────────────────
+# exibir_status()
+#   Mostra a configuração ativa: modo, diretórios, remoto e flags.
+#   Útil para debug e verificação rápida de configuração.
+# ─────────────────────────────────────────────────────────────────────────
+exibir_status() {
+    banner
+    echo -e "  ${BW}┌─ Configuração Ativa ────────────────────────────────────${Z}"
+    echo -e "  ${BW}│${Z}"
+    echo -e "  ${BW}│${Z}  ${BW}Modo:${Z}              ${COR_MODO}${MODO_NOME} ${ICONE_MODO}${Z}"
+    echo -e "  ${BW}│${Z}  ${BW}Script:${Z}            ${C}$CHAMADA${Z}"
+    echo -e "  ${BW}│${Z}  ${BW}Usuário:${Z}           ${C}$(whoami)${Z}"
+    echo -e "  ${BW}│${Z}"
+    echo -e "  ${BW}│${Z}  ${BW}Dir. Local:${Z}        ${C}$DIRETORIO_LOCAL${Z}"
+    echo -e "  ${BW}│${Z}  ${BW}Remoto:${Z}            ${C}$REMOTE_PATH${Z}"
+    echo -e "  ${BW}│${Z}"
+    echo -e "  ${BW}│${Z}  ${BW}Transfers:${Z}         ${C}16 streams paralelos${Z}"
+    echo -e "  ${BW}│${Z}  ${BW}Checkers:${Z}          ${C}32 verificadores${Z}"
+    echo -e "  ${BW}│${Z}  ${BW}Buffer:${Z}            ${C}64M${Z}"
+    echo -e "  ${BW}│${Z}  ${BW}Chunk Size:${Z}        ${C}128M${Z}"
+    echo -e "  ${BW}│${Z}  ${BW}Multi-thread:${Z}      ${C}16 streams por arquivo${Z}"
+    echo -e "  ${BW}│${Z}"
+    echo -e "  ${BW}└──────────────────────────────────────────────────────────${Z}"
+    echo ""
+    exit 0
+}
+
+# ╔═══════════════════════════════════════════════════════════════════════╗
+# ║                      EXECUÇÃO PRINCIPAL                              ║
+# ╚═══════════════════════════════════════════════════════════════════════╝
+
+# ─────────────────────────────────────────────────────────────────────────
+# Intercepta comandos especiais (help / status) antes de tudo
+# ─────────────────────────────────────────────────────────────────────────
+case "$1" in
+    help|--help|-h)  exibir_ajuda  ;;   # Exibe ajuda e sai
+    status)          exibir_status ;;   # Exibe configuração e sai
+esac
+
+# Exibe o banner principal
+banner
+
+# ─────────────────────────────────────────────────────────────────────────
+# FLAGS DO RCLONE — Cada flag está documentada individualmente
+#
+# Referência: https://rclone.org/flags/
+# ─────────────────────────────────────────────────────────────────────────
+RCLONE_FLAGS=(
+    # -P (--progress): Exibe progresso da transferência em tempo real
+    -P
+
+    # --ignore-checksum: Pula verificação de checksum após cópia.
+    #   Acelera a transferência ao confiar no tamanho do arquivo.
+    --ignore-checksum
+
+    # --transfers=16: Número de transferências simultâneas de arquivos.
+    #   Valor alto para maximizar uso de banda em conexões rápidas.
+    --transfers=16
+
+    # --checkers=32: Número de verificadores paralelos que comparam
+    #   arquivos na origem e destino para decidir o que transferir.
+    --checkers=32
+
+    # --buffer-size=64M: Tamanho do buffer em memória por transferência.
+    #   Valores maiores reduzem operações I/O mas consomem mais RAM.
+    --buffer-size=64M
+
+    # --drive-chunk-size=128M: Tamanho de cada chunk enviado ao Google
+    #   Drive. Chunks maiores = menos requests HTTP = mais velocidade
+    #   em conexões estáveis. 128M × 16 transfers = ~2GB RAM max.
+    --drive-chunk-size=128M
+
+    # --drive-upload-cutoff=64M: Arquivos acima deste tamanho são
+    #   enviados usando upload em chunks (resumable upload).
+    --drive-upload-cutoff=64M
+
+    # --retries=3: Número de tentativas em caso de falha na transferência.
+    --retries=3
+
+    # --multi-thread-streams=16: Número de threads para download de
+    #   um único arquivo grande (split download).
+    --multi-thread-streams=16
+
+    # --fast-list: Usa menos requests para listar diretórios remotos
+    #   fazendo um único LIST recursivo. Usa mais RAM mas é muito
+    #   mais rápido em diretórios com muitos arquivos.
+    --fast-list
+
+    # --drive-acknowledge-abuse: Permite baixar arquivos que o Google
+    #   Drive marcou como potencialmente perigosos (abuse flag).
+    --drive-acknowledge-abuse
+)
+
+# ─────────────────────────────────────────────────────────────────────────
+# LÓGICA PRINCIPAL — Decide entre Upload (up) e Download (padrão)
+# ─────────────────────────────────────────────────────────────────────────
+
+if [[ "$1" == "up" ]]; then
+    # ── MODO UPLOAD: Servidor → Nuvem ────────────────────────────────
+    # Requer um segundo argumento com o nome do arquivo ou diretório.
+
+    if [[ -z "$2" ]]; then
+        # Sem argumento: exibe aviso de uso correto e sai
+        echo -e "  ${BY}⚠  Atenção:${Z} Você precisa especificar o arquivo ou pasta para upload."
+        echo ""
+        echo -e "  ${BW}Exemplo:${Z}"
+        echo -e "    ${BC}$CHAMADA up \"Nome do Arquivo.mkv\"${Z}"
+        echo -e "    ${BC}$CHAMADA up \"Nome da Pasta\"${Z}"
+        echo ""
+        exit 1
+    fi
+
+    # Constrói o caminho completo do item local
+    LOCAL_ITEM="$DIRETORIO_LOCAL/$2"
+
+    # Verifica se o item existe no sistema de arquivos
+    if [[ ! -e "$LOCAL_ITEM" ]]; then
+        msg_erro "Arquivo ou diretório não encontrado: $LOCAL_ITEM"
+    fi
+
+    if [[ -d "$LOCAL_ITEM" ]]; then
+        # ── Upload de Diretório ──────────────────────────────────────
+        # Usa "rclone copy" para copiar todo o conteúdo do diretório
+        # para um subdiretório com o mesmo nome no remoto.
+        info_operacao "UPLOAD ⬆  (Diretório)" \
+                      "📂 $LABEL_SERVIDOR  →  ${BY}$2${Z}" \
+                      "☁️  $LABEL_REMOTO" \
+                      "Enviando diretório para a nuvem..."
+
+        rclone copy "$LOCAL_ITEM" "$REMOTE_PATH/$2" "${RCLONE_FLAGS[@]}"
+    else
+        # ── Upload de Arquivo Único ──────────────────────────────────
+        # Usa "rclone copy" com o diretório que contém o arquivo como
+        # origem e --include para filtrar apenas o arquivo desejado.
+        info_operacao "UPLOAD ⬆  (Arquivo)" \
+                      "📄 $LABEL_SERVIDOR  →  ${BY}$2${Z}" \
+                      "☁️  $LABEL_REMOTO" \
+                      "Enviando arquivo para a nuvem..."
+
+        rclone copy "$LOCAL_ITEM" "$REMOTE_PATH/" --include "$2" "${RCLONE_FLAGS[@]}"
+    fi
+
+    # Exibe mensagem de sucesso com tempo total
+    msg_sucesso
+
+else
+    # ── MODO DOWNLOAD (padrão): Nuvem → Servidor ────────────────────
+    # Sem argumentos (ou argumento diferente de "up"/"help"/"status"),
+    # baixa todo o conteúdo do remoto para o diretório local.
+    info_operacao "DOWNLOAD ⬇  (Sincronização)" \
+                  "☁️  $LABEL_REMOTO" \
+                  "📂 $LABEL_SERVIDOR  →  ${BY}$DIRETORIO_LOCAL${Z}" \
+                  "Baixando arquivos da nuvem para o servidor..."
+
+    rclone copy "$REMOTE_PATH/" "$DIRETORIO_LOCAL/" "${RCLONE_FLAGS[@]}"
+
+    # Exibe mensagem de sucesso com tempo total
+    msg_sucesso
+fi
