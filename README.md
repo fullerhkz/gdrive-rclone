@@ -216,7 +216,7 @@ MODO_2_LABEL="MODO 2"        # Nome que aparece no painel
 Exemplo: para criar o comando `gdrive-filme`:
 ```bash
 DIRETORIO_2="/home/john/downloads/filmes"
-MODO_2_SUFIXO="filme"
+MODO_2_SUFIXO="filmes"
 MODO_2_LABEL="FILMES"
 ```
 Depois crie o link:
