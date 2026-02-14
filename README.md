@@ -212,8 +212,8 @@ Localize as linhas com `DIRETORIO_LOCAL` e substitua pelos caminhos reais dos se
 Localize a linha `REMOTE_PATH` e substitua pelo nome do seu remoto e a pasta no Google Drive:
 
 ```diff
-- REMOTE_PATH="SEU_REMOTO:/SEU_DIRETORIO_REMOTO"
-+ REMOTE_PATH="meugdrive:/Backups Servidor"
+- REMOTE_PATH="SEU_REMOTO:/SEU_DIRETORIO_REMOTO"   # Caminho do remoto configurado no rclone
++ REMOTE_PATH="meugdrive:/Backups Servidor"         # Caminho do remoto configurado no rclone
 ```
 
 > [!IMPORTANT]
@@ -228,8 +228,8 @@ Localize a linha `REMOTE_PATH` e substitua pelo nome do seu remoto e a pasta no 
 O label é apenas um texto exibido na interface durante as transferências. Personalize se quiser:
 
 ```diff
-- LABEL_SERVIDOR="Servidor"
-+ LABEL_SERVIDOR="Servidor (Home)"
+- LABEL_SERVIDOR="Servidor"                         # Label exibido na interface para o local
++ LABEL_SERVIDOR="Servidor (Home)"                   # Label exibido na interface para o local
 ```
 
 ### Passo 6 — Salve e feche o editor
