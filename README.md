@@ -313,15 +313,37 @@ Isso exibirá um painel com o modo ativo, diretórios e parâmetros do rclone.
 
 ## 🚀 Uso
 
+### 📥 Download (Nuvem → Servidor)
+
+Ao executar o comando sem argumentos, **todo o conteúdo** da pasta configurada no remoto (`REMOTE_PATH`) será transferido para o diretório local equivalente ao modo do comando. Por exemplo, `gdrive` transfere para `DIRETORIO_1`, `gdrive-filmes` para `DIRETORIO_2`, etc.
+
 ```bash
-# Download: Nuvem → Servidor
+# Baixar todo o conteúdo da nuvem para o diretório local do modo padrão
 gdrive
 
-# Upload: Servidor → Nuvem (arquivo ou pasta)
+# Baixar usando um modo alternativo (ex: filmes)
+gdrive-filmes
+```
+
+### 📤 Upload (Servidor → Nuvem)
+
+Para enviar arquivos ou pastas do servidor para o Google Drive, use o subcomando `up` seguido do nome do arquivo ou pasta. O item deve estar dentro do diretório local configurado para o modo ativo.
+
+```bash
+# Enviar um arquivo para a nuvem
 gdrive up "Nome do Arquivo.mkv"
+
+# Enviar uma pasta inteira para a nuvem
 gdrive up "Nome da Pasta"
 
-# Exibir ajuda
+# Upload usando um modo alternativo (ex: filmes)
+gdrive-filmes up "Nome do Filme.mkv"
+```
+
+### 🛠️ Comandos Auxiliares
+
+```bash
+# Exibir ajuda completa
 gdrive help
 
 # Exibir configuração ativa
@@ -341,6 +363,9 @@ O script detecta o modo automaticamente pelo nome do executável (`basename $0`)
 | `gdrive-musicas` | MUSICAS | 🎵 | Diretório de músicas (`.../downloads/musicas`) |
 
 Os modos adicionais são ativados via **symlinks** que apontam para o mesmo script `gdrive`. O nome do comando define qual configuração usar.
+
+> [!NOTE]
+> Ao executar qualquer um desses comandos sem argumentos (ex: `gdrive` ou `gdrive-filmes`), **todo o conteúdo** da pasta remota configurada em `REMOTE_PATH` será transferido para o diretório local correspondente ao modo. Para enviar arquivos do servidor para a nuvem, use o subcomando `up`.
 
 ---
 
@@ -648,15 +673,37 @@ Isso exibirá um painel com o modo ativo, diretórios e parâmetros do rclone.
 
 ## 🚀 Uso
 
+### 📥 Download (Nuvem → Servidor)
+
+Ao executar o comando sem argumentos, **todo o conteúdo** da pasta configurada no remoto (`REMOTE_PATH`) será transferido para o diretório local equivalente ao modo do comando. Por exemplo, `gdrive` transfere para `DIRETORIO_1`, `gdrive-filmes` para `DIRETORIO_2`, etc.
+
 ```bash
-# Download: Nuvem → Servidor
+# Baixar todo o conteúdo da nuvem para o diretório local do modo padrão
 gdrive
 
-# Upload: Servidor → Nuvem (arquivo ou pasta)
+# Baixar usando um modo alternativo (ex: filmes)
+gdrive-filmes
+```
+
+### 📤 Upload (Servidor → Nuvem)
+
+Para enviar arquivos ou pastas do servidor para o Google Drive, use o subcomando `up` seguido do nome do arquivo ou pasta. O item deve estar dentro do diretório local configurado para o modo ativo.
+
+```bash
+# Enviar um arquivo para a nuvem
 gdrive up "Nome do Arquivo.mkv"
+
+# Enviar uma pasta inteira para a nuvem
 gdrive up "Nome da Pasta"
 
-# Exibir ajuda
+# Upload usando um modo alternativo (ex: filmes)
+gdrive-filmes up "Nome do Filme.mkv"
+```
+
+### 🛠️ Comandos Auxiliares
+
+```bash
+# Exibir ajuda completa
 gdrive help
 
 # Exibir configuração ativa
@@ -672,16 +719,13 @@ O script detecta o modo automaticamente pelo nome do executável (`basename $0`)
 | Comando | Modo | Ícone | Diretório |
 |---------|------|-------|-----------|
 | `gdrive` | NORMAL | 📀 | Diretório padrão (`.../downloads/geral`) |
-| `gdrive-filmes` | filmes | 🎬 | Diretório de filmes (`.../downloads/filmes`) |
+| `gdrive-filmes` | FILMES | 🎬 | Diretório de filmes (`.../downloads/filmes`) |
 | `gdrive-musicas` | MUSICAS | 🎵 | Diretório de músicas (`.../downloads/musicas`) |
 
-| Comando | Modo | Ícone | Diretório |
-|---------|------|-------|-----------|
-| `gdrive` | NORMAL | 📀 | Diretório padrão de downloads |
-| `gdrive-filmes` | filmes | 🎬 | Diretório de filmes (exemplo) |
-| `gdrive-backup` | BACKUP | �️ | Diretório de backups (exemplo) |
-
 Os modos adicionais são ativados via **symlinks** que apontam para o mesmo script `gdrive`. O nome do comando define qual configuração usar.
+
+> [!NOTE]
+> Ao executar qualquer um desses comandos sem argumentos (ex: `gdrive` ou `gdrive-filmes`), **todo o conteúdo** da pasta remota configurada em `REMOTE_PATH` será transferido para o diretório local correspondente ao modo. Para enviar arquivos do servidor para a nuvem, use o subcomando `up`.
 
 ---
 
@@ -738,10 +782,22 @@ Cada flag usada está documentada abaixo. Apenas flags que melhoram a velocidade
 
 ## 📝 Exemplos
 
+### Download (Nuvem → Servidor)
+
 ```bash
 # Sincronizar tudo da nuvem para o servidor (modo normal)
 $ gdrive
 
+# Sincronizar no modo filmes (baixa o conteúdo remoto para o diretório de filmes)
+$ gdrive-filmes
+
+# Sincronizar no modo músicas
+$ gdrive-musicas
+```
+
+### Upload (Servidor → Nuvem)
+
+```bash
 # Enviar um filme para a nuvem
 $ gdrive up "filme.2024.1080p.BluRay.mkv"
 
@@ -753,9 +809,16 @@ $ gdrive-filmes up "filme_Legal_2024.mkv"
 
 # Upload no modo alternativo (ex: Músicas)
 $ gdrive-musicas up "Album Completo.zip"
+```
 
+### Auxiliares
+
+```bash
 # Ver configuração atual
 $ gdrive status
+
+# Exibir ajuda
+$ gdrive help
 ```
 
 ### Saída Esperada (upload)
