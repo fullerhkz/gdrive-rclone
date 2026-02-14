@@ -7,7 +7,7 @@
 # ║                                                                      ║
 # ║  MODOS DE OPERAÇÃO (detectados pelo nome do executável/symlink):     ║
 # ║    • gdrive           → Modo padrão  (DIRETORIO_1)                  ║
-# ║    • gdrive-filme     → Modo Filmes  (DIRETORIO_2)                  ║
+# ║    • gdrive-filmes    → Modo Filmes  (DIRETORIO_2)                  ║
 # ║    • gdrive-musicas   → Modo Músicas (DIRETORIO_3)                  ║
 # ║                                                                      ║
 # ║  USO:                                                                ║
@@ -18,7 +18,7 @@
 # ║                                                                      ║
 # ║  NOTA: Para os modos 2 e 3, crie symlinks apontando para este       ║
 # ║        script com o sufixo desejado:                                 ║
-# ║          ln -s /caminho/gdrive /caminho/gdrive-filme                ║
+# ║          ln -s /caminho/gdrive /caminho/gdrive-filmes               ║
 # ║          ln -s /caminho/gdrive /caminho/gdrive-musicas              ║
 # ╚═══════════════════════════════════════════════════════════════════════╝
 
@@ -83,11 +83,11 @@ DIRETORIO_1="/home/SEU_USUARIO/downloads/geral"
 #   Comando: gdrive
 
 # ─────────────────────────────────────────────────────────────────────────
-# DIRETÓRIO 2 — Modo alternativo (executando como "gdrive-filme")
-#   Symlink: ln -s /usr/local/bin/gdrive /usr/local/bin/gdrive-filme
+# DIRETÓRIO 2 — Modo alternativo (executando como "gdrive-filmes")
+#   Symlink: ln -s /usr/local/bin/gdrive /usr/local/bin/gdrive-filmes
 # ─────────────────────────────────────────────────────────────────────────
 DIRETORIO_2="/home/SEU_USUARIO/downloads/filmes"
-MODO_2_SUFIXO="filme"        # Sufixo do comando (ex: gdrive-filme)
+MODO_2_SUFIXO="filmes"       # Sufixo do comando (ex: gdrive-filmes)
 MODO_2_LABEL="FILMES"        # Nome exibido na interface
 MODO_2_ICONE="🎬"            # Ícone exibido na interface (opcional)
 MODO_2_COR="$BR"             # Cor do modo na interface

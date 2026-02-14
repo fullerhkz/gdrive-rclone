@@ -217,7 +217,7 @@ Exemplo: para criar o comando `gdrive-filmes`:
 ```bash
 DIRETORIO_2="/home/john/downloads/filmes"
 MODO_2_SUFIXO="filmes"
-MODO_2_LABEL="filmes"
+MODO_2_LABEL="FILMES"
 ```
 Depois crie o link:
 ```bash
@@ -337,7 +337,7 @@ O script detecta o modo automaticamente pelo nome do executável (`basename $0`)
 | Comando | Modo | Ícone | Diretório |
 |---------|------|-------|-----------|
 | `gdrive` | NORMAL | 📀 | Diretório padrão (`.../downloads/geral`) |
-| `gdrive-filmes` | filmes | 🎬 | Diretório de filmes (`.../downloads/filmes`) |
+| `gdrive-filmes` | FILMES | 🎬 | Diretório de filmes (`.../downloads/filmes`) |
 | `gdrive-musicas` | MUSICAS | 🎵 | Diretório de músicas (`.../downloads/musicas`) |
 
 Os modos adicionais são ativados via **symlinks** que apontam para o mesmo script `gdrive`. O nome do comando define qual configuração usar.
@@ -552,7 +552,7 @@ Exemplo: para criar o comando `gdrive-filmes`:
 ```bash
 DIRETORIO_2="/home/john/downloads/filmes"
 MODO_2_SUFIXO="filmes"
-MODO_2_LABEL="filmes"
+MODO_2_LABEL="FILMES"
 ```
 Depois crie o link:
 ```bash
