@@ -6,9 +6,9 @@
 # ║  local e o Google Drive usando rclone.                               ║
 # ║                                                                      ║
 # ║  MODOS DE OPERAÇÃO (detectados pelo nome do executável/symlink):     ║
-# ║    • gdrive       → Modo NORMAL   (dir: SEU_DIRETORIO)              ║
-# ║    • gdrive-rip   → Modo RIP      (dir: SEU_DIRETORIO-rip)          ║
-# ║    • gdrive-perma → Modo PERMA    (dir: SEU_DIRETORIO_PERMANENTE)   ║
+# ║    • gdrive           → Modo padrão  (DIRETORIO_1)                  ║
+# ║    • gdrive-MODO_2    → Modo 2       (DIRETORIO_2)                  ║
+# ║    • gdrive-MODO_3    → Modo 3       (DIRETORIO_3)                  ║
 # ║                                                                      ║
 # ║  USO:                                                                ║
 # ║    gdrive                    Baixar arquivos da nuvem → servidor     ║
@@ -16,10 +16,10 @@
 # ║    gdrive help               Exibir ajuda completa                   ║
 # ║    gdrive status             Exibir configuração ativa               ║
 # ║                                                                      ║
-# ║  NOTA: Para os modos RIP e PERMA, crie symlinks apontando para      ║
-# ║        este script:                                                  ║
-# ║          ln -s /caminho/gdrive /caminho/gdrive-rip                   ║
-# ║          ln -s /caminho/gdrive /caminho/gdrive-perma                 ║
+# ║  NOTA: Para os modos 2 e 3, crie symlinks apontando para este       ║
+# ║        script com o sufixo desejado:                                 ║
+# ║          ln -s /caminho/gdrive /caminho/gdrive-MODO_2               ║
+# ║          ln -s /caminho/gdrive /caminho/gdrive-MODO_3               ║
 # ╚═══════════════════════════════════════════════════════════════════════╝
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -68,38 +68,72 @@ C5='\033[38;5;49m'    # Ciano
 C6='\033[38;5;50m'    # Ciano-verde
 C7='\033[38;5;43m'    # Verde-ciano
 
-# ─────────────────────────────────────────────────────────────────────────
-# DETECÇÃO DE MODO — Baseado no nome do executável (basename $0)
+# ═════════════════════════════════════════════════════════════════════════
+#                     ⚙  CONFIGURAÇÃO DO SCRIPT  ⚙
+# ═════════════════════════════════════════════════════════════════════════
 #
-# Permite usar um único script com symlinks para diferentes diretórios:
-#   • "rip"  no nome → modo RIP  (diretório alternativo)
-#   • "perma" no nome → modo PERMANENTE (diretório permanente)
-#   • qualquer outro  → modo NORMAL (diretório padrão)
+#   Configure abaixo os diretórios locais, o remoto do rclone e os
+#   labels de exibição. Cada modo (padrão, modo 2, modo 3) tem seu
+#   próprio diretório local e comando de symlink.
+#
 # ─────────────────────────────────────────────────────────────────────────
-CHAMADA=$(basename "$0")
-DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS"
-MODO_NOME="NORMAL"
-ICONE_MODO="📀"
-COR_MODO="$BC"
-
-if [[ "$CHAMADA" == *"rip"* ]]; then
-    DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS_RIP"
-    MODO_NOME="RIP"
-    ICONE_MODO="💀"
-    COR_MODO="$BR"
-elif [[ "$CHAMADA" == *"perma"* ]]; then
-    DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS_PERMANENTE"
-    MODO_NOME="PERMANENTE"
-    ICONE_MODO="💎"
-    COR_MODO="$BM"
-fi
+# DIRETÓRIO 1 — Modo padrão (executando como "gdrive")
+# ─────────────────────────────────────────────────────────────────────────
+DIRETORIO_1="/home/SEU_USUARIO/SEU_DIRETORIO_1"
+#   Comando: gdrive
 
 # ─────────────────────────────────────────────────────────────────────────
-# CONFIGURAÇÃO DO RCLONE — Remoto e Labels de exibição
+# DIRETÓRIO 2 — Modo alternativo (executando como "gdrive-MODO_2")
+#   Symlink: ln -s /usr/local/bin/gdrive /usr/local/bin/gdrive-MODO_2
+# ─────────────────────────────────────────────────────────────────────────
+DIRETORIO_2="/home/SEU_USUARIO/SEU_DIRETORIO_2"
+MODO_2_SUFIXO="MODO_2"       # Sufixo do symlink — altere conforme quiser
+MODO_2_LABEL="MODO 2"        # Nome exibido na interface
+MODO_2_ICONE="⚡"            # Ícone exibido na interface
+MODO_2_COR="$BR"             # Cor do modo na interface
+
+# ─────────────────────────────────────────────────────────────────────────
+# DIRETÓRIO 3 — Modo alternativo (executando como "gdrive-MODO_3")
+#   Symlink: ln -s /usr/local/bin/gdrive /usr/local/bin/gdrive-MODO_3
+# ─────────────────────────────────────────────────────────────────────────
+DIRETORIO_3="/home/SEU_USUARIO/SEU_DIRETORIO_3"
+MODO_3_SUFIXO="MODO_3"       # Sufixo do symlink — altere conforme quiser
+MODO_3_LABEL="MODO 3"        # Nome exibido na interface
+MODO_3_ICONE="💎"            # Ícone exibido na interface
+MODO_3_COR="$BM"             # Cor do modo na interface
+
+# ─────────────────────────────────────────────────────────────────────────
+# REMOTO E LABELS — Configuração do rclone e nomes de exibição
 # ─────────────────────────────────────────────────────────────────────────
 REMOTE_PATH="SEU_REMOTO:/SEU_DIRETORIO_REMOTO"   # Caminho do remoto configurado no rclone
 LABEL_REMOTO="Google Drive"                       # Label exibido na interface para a nuvem
 LABEL_SERVIDOR="Servidor"                         # Label exibido na interface para o local
+
+# ─────────────────────────────────────────────────────────────────────────
+# DETECÇÃO DE MODO — Baseado no nome do executável (basename $0)
+#
+# Permite usar um único script com symlinks para diferentes diretórios:
+#   • MODO_2_SUFIXO no nome → modo 2 (DIRETORIO_2)
+#   • MODO_3_SUFIXO no nome → modo 3 (DIRETORIO_3)
+#   • qualquer outro        → modo padrão (DIRETORIO_1)
+# ─────────────────────────────────────────────────────────────────────────
+CHAMADA=$(basename "$0")
+DIRETORIO_LOCAL="$DIRETORIO_1"
+MODO_NOME="NORMAL"
+ICONE_MODO="📀"
+COR_MODO="$BC"
+
+if [[ "$CHAMADA" == *"$MODO_2_SUFIXO"* ]]; then
+    DIRETORIO_LOCAL="$DIRETORIO_2"
+    MODO_NOME="$MODO_2_LABEL"
+    ICONE_MODO="$MODO_2_ICONE"
+    COR_MODO="$MODO_2_COR"
+elif [[ "$CHAMADA" == *"$MODO_3_SUFIXO"* ]]; then
+    DIRETORIO_LOCAL="$DIRETORIO_3"
+    MODO_NOME="$MODO_3_LABEL"
+    ICONE_MODO="$MODO_3_ICONE"
+    COR_MODO="$MODO_3_COR"
+fi
 
 # ─────────────────────────────────────────────────────────────────────────
 # PERMISSÕES — umask 002 garante que arquivos criados tenham permissão
