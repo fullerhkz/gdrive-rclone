@@ -156,7 +156,7 @@ separador() {
 # O painel sempre terá essa largura, independente do tamanho do terminal.
 # Ajuste esse valor se quiser um painel mais largo ou mais estreito.
 # ─────────────────────────────────────────────────────────────────────────
-LARGURA_PAINEL=76
+LARGURA_PAINEL=100
 
 # ─────────────────────────────────────────────────────────────────────────
 # linha_painel(conteudo)
