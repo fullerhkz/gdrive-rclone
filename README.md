@@ -177,9 +177,14 @@ nano /usr/local/bin/gdrive
 
 Localize a linha com `USUARIO` (próxima ao início do arquivo) e substitua pelo seu usuário Linux:
 
-```diff
-- USUARIO="SEU_USUARIO"
-+ USUARIO="joao"
+No script você encontrará:
+```bash
+USUARIO="SEU_USUARIO"
+```
+
+Altere para o seu usuário, por exemplo:
+```bash
+USUARIO="joao"
 ```
 
 > [!NOTE]
@@ -190,30 +195,50 @@ Localize a linha com `USUARIO` (próxima ao início do arquivo) e substitua pelo
 Localize as linhas com `DIRETORIO_LOCAL` e substitua pelos caminhos reais dos seus diretórios de download:
 
 **Modo NORMAL** — diretório padrão de downloads:
-```diff
-- DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS"
-+ DIRETORIO_LOCAL="/home/joao/downloads/geral"
+No script você encontrará:
+```bash
+DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS"
+```
+
+Altere para o caminho real, por exemplo:
+```bash
+DIRETORIO_LOCAL="/home/joao/downloads/geral"
 ```
 
 **Modo RIP** (dentro do bloco `if [[ "$CHAMADA" == *"rip"* ]]`):
-```diff
-- DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS_RIP"
-+ DIRETORIO_LOCAL="/home/joao/downloads/rips"
+No script você encontrará:
+```bash
+DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS_RIP"
+```
+
+Altere para o caminho real, por exemplo:
+```bash
+DIRETORIO_LOCAL="/home/joao/downloads/rips"
 ```
 
 **Modo PERMANENTE** (dentro do bloco `elif [[ "$CHAMADA" == *"perma"* ]]`):
-```diff
-- DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS_PERMANENTE"
-+ DIRETORIO_LOCAL="/home/joao/downloads/permanente"
+No script você encontrará:
+```bash
+DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS_PERMANENTE"
+```
+
+Altere para o caminho real, por exemplo:
+```bash
+DIRETORIO_LOCAL="/home/joao/downloads/permanente"
 ```
 
 ### Passo 4 — Configure o remoto do rclone
 
 Localize a linha `REMOTE_PATH` e substitua pelo nome do seu remoto e a pasta no Google Drive:
 
-```diff
-- REMOTE_PATH="SEU_REMOTO:/SEU_DIRETORIO_REMOTO"   # Caminho do remoto configurado no rclone
-+ REMOTE_PATH="meugdrive:/Backups Servidor"         # Caminho do remoto configurado no rclone
+No script você encontrará:
+```bash
+REMOTE_PATH="SEU_REMOTO:/SEU_DIRETORIO_REMOTO"   # Caminho do remoto configurado no rclone
+```
+
+Altere para o seu remoto e pasta, por exemplo:
+```bash
+REMOTE_PATH="meugdrive:/Backups Servidor"         # Caminho do remoto configurado no rclone
 ```
 
 > [!IMPORTANT]
@@ -227,9 +252,14 @@ Localize a linha `REMOTE_PATH` e substitua pelo nome do seu remoto e a pasta no 
 
 O label é apenas um texto exibido na interface durante as transferências. Personalize se quiser:
 
-```diff
-- LABEL_SERVIDOR="Servidor"                         # Label exibido na interface para o local
-+ LABEL_SERVIDOR="Servidor (Home)"                   # Label exibido na interface para o local
+No script você encontrará:
+```bash
+LABEL_SERVIDOR="Servidor"                         # Label exibido na interface para o local
+```
+
+Altere se quiser, por exemplo:
+```bash
+LABEL_SERVIDOR="Servidor (Home)"                   # Label exibido na interface para o local
 ```
 
 ### Passo 6 — Salve e feche o editor
