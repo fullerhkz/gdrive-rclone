@@ -164,19 +164,101 @@ rclone config
 > [!CAUTION]
 > Antes de usar, você **DEVE** editar as variáveis no início do script com seus valores reais. O script não funcionará com os placeholders padrão.
 
-Abra o script e altere as seguintes variáveis:
+### Passo 1 — Abra o script no editor de texto
 
-| Variável | Placeholder | Descrição |
-|----------|-------------|-----------|
-| `USUARIO` | `SEU_USUARIO` | Usuário Linux que executará o script |
-| `DIRETORIO_LOCAL` (normal) | `SEU_DIRETORIO_DOWNLOADS` | Diretório local para o modo NORMAL |
-| `DIRETORIO_LOCAL` (rip) | `SEU_DIRETORIO_DOWNLOADS_RIP` | Diretório local para o modo RIP |
-| `DIRETORIO_LOCAL` (perma) | `SEU_DIRETORIO_DOWNLOADS_PERMANENTE` | Diretório local para o modo PERMANENTE |
-| `REMOTE_PATH` | `SEU_REMOTO:/SEU_DIRETORIO_REMOTO` | Nome do remoto rclone + pasta no Drive |
-| `LABEL_SERVIDOR` | `Servidor` | Label exibido na interface para o local |
+```bash
+nano /usr/local/bin/gdrive
+```
+
+> [!TIP]
+> Você pode usar qualquer editor: `nano`, `vim`, `vi`, etc. O `nano` é o mais simples para iniciantes.
+
+### Passo 2 — Altere o usuário do sistema
+
+Localize a linha com `USUARIO` (próxima ao início do arquivo) e substitua pelo seu usuário Linux:
+
+```diff
+- USUARIO="SEU_USUARIO"
++ USUARIO="joao"
+```
+
+> [!NOTE]
+> Para descobrir seu usuário, execute `whoami` no terminal.
+
+### Passo 3 — Configure os diretórios locais
+
+Localize as linhas com `DIRETORIO_LOCAL` e substitua pelos caminhos reais dos seus diretórios de download:
+
+**Modo NORMAL** — diretório padrão de downloads:
+```diff
+- DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS"
++ DIRETORIO_LOCAL="/home/joao/downloads/geral"
+```
+
+**Modo RIP** (dentro do bloco `if [[ "$CHAMADA" == *"rip"* ]]`):
+```diff
+- DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS_RIP"
++ DIRETORIO_LOCAL="/home/joao/downloads/rips"
+```
+
+**Modo PERMANENTE** (dentro do bloco `elif [[ "$CHAMADA" == *"perma"* ]]`):
+```diff
+- DIRETORIO_LOCAL="/home/SEU_USUARIO/SEU_DIRETORIO_DOWNLOADS_PERMANENTE"
++ DIRETORIO_LOCAL="/home/joao/downloads/permanente"
+```
+
+### Passo 4 — Configure o remoto do rclone
+
+Localize a linha `REMOTE_PATH` e substitua pelo nome do seu remoto e a pasta no Google Drive:
+
+```diff
+- REMOTE_PATH="SEU_REMOTO:/SEU_DIRETORIO_REMOTO"
++ REMOTE_PATH="meugdrive:/Backups Servidor"
+```
 
 > [!IMPORTANT]
-> O valor de `REMOTE_PATH` deve corresponder exatamente ao nome do remoto configurado no `rclone config`. Use `rclone listremotes` para verificar.
+> O nome antes dos `:` deve ser **exatamente** o nome do remoto configurado no rclone. Para verificar, execute:
+> ```bash
+> rclone listremotes
+> ```
+> Se o resultado for `meugdrive:`, então use `meugdrive:/Nome da Pasta`.
+
+### Passo 5 — (Opcional) Altere o label do servidor
+
+O label é apenas um texto exibido na interface durante as transferências. Personalize se quiser:
+
+```diff
+- LABEL_SERVIDOR="Servidor"
++ LABEL_SERVIDOR="Servidor (Home)"
+```
+
+### Passo 6 — Salve e feche o editor
+
+No `nano`, pressione:
+1. **`Ctrl + O`** → salvar
+2. **`Enter`** → confirmar o nome do arquivo
+3. **`Ctrl + X`** → sair
+
+### Resumo das variáveis
+
+| Variável | Placeholder | Exemplo |
+|----------|-------------|---------|
+| `USUARIO` | `SEU_USUARIO` | `joao` |
+| `DIRETORIO_LOCAL` (normal) | `SEU_DIRETORIO_DOWNLOADS` | `/home/joao/downloads/geral` |
+| `DIRETORIO_LOCAL` (rip) | `SEU_DIRETORIO_DOWNLOADS_RIP` | `/home/joao/downloads/rips` |
+| `DIRETORIO_LOCAL` (perma) | `SEU_DIRETORIO_DOWNLOADS_PERMANENTE` | `/home/joao/downloads/permanente` |
+| `REMOTE_PATH` | `SEU_REMOTO:/SEU_DIRETORIO_REMOTO` | `meugdrive:/Backups Servidor` |
+| `LABEL_SERVIDOR` | `Servidor` | `Servidor (Home)` |
+
+### Verificar a configuração
+
+Após salvar, execute o comando abaixo para confirmar que tudo está configurado corretamente:
+
+```bash
+gdrive status
+```
+
+Isso exibirá um painel com o modo ativo, diretórios e parâmetros do rclone.
 
 ---
 
