@@ -150,11 +150,41 @@ separador() {
     echo -e "  ${B}═══════════════════════════════════════════════════════════${Z}"
 }
 
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# linha_painel(conteudo)
+#   Imprime uma linha dentro do painel com bordas │ esquerda e direita,
+#   preenchendo com espaços até a largura do terminal para fechar o
+#   retângulo visual. Usa strip ANSI para calcular largura real do texto.
+#
+#   Parâmetros:
+#     $1 — Conteúdo da linha (pode conter códigos ANSI de cor)
+# ─────────────────────────────────────────────────────────────────────────
+linha_painel() {
+    local conteudo="$1"
+    # Largura do terminal (fallback 80 colunas)
+    local cols
+    cols=$(tput cols 2>/dev/null || echo 80)
+    # Margem: 2 espaços + │ + espaço (esquerda) = 4 chars | espaço + │ (direita) = 2 chars
+    local largura_interna=$(( cols - 6 ))
+    # Remove códigos ANSI para calcular a largura visível real
+    local texto_limpo
+    texto_limpo=$(echo -e "$conteudo" | sed 's/\x1b\[[0-9;]*m//g')
+    local texto_len=${#texto_limpo}
+    # Calcula padding necessário para fechar a borda direita
+    local padding=$(( largura_interna - texto_len ))
+    if [[ $padding -lt 0 ]]; then padding=0; fi
+    printf -v espacos '%*s' "$padding" ''
+    echo -e "  ${BW}│${Z} ${conteudo}${espacos} ${BW}│${Z}"
+}
+
 # ─────────────────────────────────────────────────────────────────────────
 # info_operacao(acao, origem, destino, mensagem)
 #   Exibe um painel informativo antes de iniciar uma operação de
 #   transferência. Mostra a operação, origem, destino e uma mensagem
-#   de status.
+#   de status. O painel se adapta à largura do terminal, fechando o
+#   retângulo com bordas │ na esquerda e direita.
 #
 #   Parâmetros:
 #     $1 — Nome da operação (ex: "UPLOAD", "DOWNLOAD")
@@ -168,16 +198,34 @@ info_operacao() {
     local destino="$3"
     local mensagem="$4"
 
-    echo -e "  ${BW}┌─ Operação ──────────────────────────────────────────────${Z}"
-    echo -e "  ${BW}│${Z}  ${BG}▶ $acao${Z}"
-    echo -e "  ${BW}│${Z}"
-    echo -e "  ${BW}│${Z}  ${BW}Origem :${Z}  $origem"
-    echo -e "  ${BW}│${Z}  ${BW}Destino:${Z}  $destino"
-    echo -e "  ${BW}│${Z}"
-    echo -e "  ${BW}│${Z}  ${C}⟫ $mensagem${Z}"
-    echo -e "  ${BW}└──────────────────────────────────────────────────────────${Z}"
+    # Largura do terminal (fallback 80 colunas)
+    local cols
+    cols=$(tput cols 2>/dev/null || echo 80)
+    # Largura interna do painel (sem as bordas laterais e margens)
+    local barra_len=$(( cols - 4 ))
+
+    # Monta as barras superior e inferior dinamicamente
+    local barra_top barra_bot
+    printf -v barra_top '%*s' "$barra_len" ''
+    barra_top="${barra_top// /─}"
+    printf -v barra_bot '%*s' "$barra_len" ''
+    barra_bot="${barra_bot// /─}"
+
+    # Substitui os primeiros caracteres da barra superior para o label
+    local label="─ Operação "
+    barra_top="${label}${barra_top:${#label}}"
+
+    echo -e "  ${BW}┌${barra_top}┐${Z}"
+    linha_painel " ${BG}▶ $acao${Z}"
+    linha_painel ""
+    linha_painel " ${BW}Origem :${Z}  $origem"
+    linha_painel " ${BW}Destino:${Z}  $destino"
+    linha_painel ""
+    linha_painel " ${C}⟫ $mensagem${Z}"
+    echo -e "  ${BW}└${barra_bot}┘${Z}"
     echo ""
 }
+
 
 # ─────────────────────────────────────────────────────────────────────────
 # msg_sucesso()
