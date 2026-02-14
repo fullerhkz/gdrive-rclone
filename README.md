@@ -205,7 +205,7 @@ Altere para o caminho real, por exemplo:
 DIRETORIO_1="/home/john/downloads/geral"
 ```
 
-**Diretório 2** — modo alternativo (ex: Filmes):
+**Diretório 2** — modo alternativo (ex: filmes):
 No script você encontrará:
 ```bash
 DIRETORIO_2="/home/SEU_USUARIO/SEU_DIRETORIO_2"
@@ -213,15 +213,15 @@ MODO_2_SUFIXO="MODO_2"       # O que vem depois do traço no comando (gdrive-XXX
 MODO_2_LABEL="MODO 2"        # Nome que aparece no painel
 ```
 
-Exemplo: para criar o comando `gdrive-filme`:
+Exemplo: para criar o comando `gdrive-filmes`:
 ```bash
 DIRETORIO_2="/home/john/downloads/filmes"
 MODO_2_SUFIXO="filmes"
-MODO_2_LABEL="FILMES"
+MODO_2_LABEL="filmes"
 ```
 Depois crie o link:
 ```bash
-sudo ln -s /usr/local/bin/gdrive /usr/local/bin/gdrive-filme
+sudo ln -s /usr/local/bin/gdrive /usr/local/bin/gdrive-filmes
 ```
 
 **Diretório 3** — modo alternativo (ex: Músicas):
@@ -295,7 +295,7 @@ No `nano`, pressione:
 | `USUARIO` | `SEU_USUARIO` | `john` |
 | `DIRETORIO_LOCAL` (normal) | `SEU_DIRETORIO_DOWNLOADS` | `/home/john/downloads/geral` |
 | `DIRETORIO_LOCAL` (modos) | (outros caminhos) | `/home/john/downloads/filmes`, `/home/john/downloads/musicas` |
-| `MODO_X_SUFIXO` | `MODO_X` | `filme` (para o comando `gdrive-filme`) |
+| `MODO_X_SUFIXO` | `MODO_X` | `filmes` (para o comando `gdrive-filmes`) |
 | `REMOTE_PATH` | `SEU_REMOTO:/SEU_DIRETORIO_REMOTO` | `meugdrive:/Backups Servidor` |
 | `LABEL_SERVIDOR` | `Servidor` | `Servidor (Home)` |
 
@@ -337,7 +337,7 @@ O script detecta o modo automaticamente pelo nome do executável (`basename $0`)
 | Comando | Modo | Ícone | Diretório |
 |---------|------|-------|-----------|
 | `gdrive` | NORMAL | 📀 | Diretório padrão (`.../downloads/geral`) |
-| `gdrive-filme` | FILMES | 🎬 | Diretório de filmes (`.../downloads/filmes`) |
+| `gdrive-filmes` | filmes | 🎬 | Diretório de filmes (`.../downloads/filmes`) |
 | `gdrive-musicas` | MUSICAS | 🎵 | Diretório de músicas (`.../downloads/musicas`) |
 
 Os modos adicionais são ativados via **symlinks** que apontam para o mesmo script `gdrive`. O nome do comando define qual configuração usar.
@@ -540,7 +540,7 @@ Altere para o caminho real, por exemplo:
 DIRETORIO_1="/home/john/downloads/geral"
 ```
 
-**Diretório 2** — modo alternativo (ex: Filmes):
+**Diretório 2** — modo alternativo (ex: filmes):
 No script você encontrará:
 ```bash
 DIRETORIO_2="/home/SEU_USUARIO/SEU_DIRETORIO_2"
@@ -548,15 +548,15 @@ MODO_2_SUFIXO="MODO_2"       # O que vem depois do traço no comando (gdrive-XXX
 MODO_2_LABEL="MODO 2"        # Nome que aparece no painel
 ```
 
-Exemplo: para criar o comando `gdrive-filme`:
+Exemplo: para criar o comando `gdrive-filmes`:
 ```bash
 DIRETORIO_2="/home/john/downloads/filmes"
-MODO_2_SUFIXO="filme"
-MODO_2_LABEL="FILMES"
+MODO_2_SUFIXO="filmes"
+MODO_2_LABEL="filmes"
 ```
 Depois crie o link:
 ```bash
-sudo ln -s /usr/local/bin/gdrive /usr/local/bin/gdrive-filme
+sudo ln -s /usr/local/bin/gdrive /usr/local/bin/gdrive-filmes
 ```
 
 **Diretório 3** — modo alternativo (ex: Músicas):
@@ -630,7 +630,7 @@ No `nano`, pressione:
 | `USUARIO` | `SEU_USUARIO` | `john` |
 | `DIRETORIO_LOCAL` (normal) | `SEU_DIRETORIO_DOWNLOADS` | `/home/john/downloads/geral` |
 | `DIRETORIO_LOCAL` (modos) | (outros caminhos) | `/home/john/downloads/filmes`, `/home/john/downloads/musicas` |
-| `MODO_X_SUFIXO` | `MODO_X` | `filme` (para o comando `gdrive-filme`) |
+| `MODO_X_SUFIXO` | `MODO_X` | `filmes` (para o comando `gdrive-filmes`) |
 | `REMOTE_PATH` | `SEU_REMOTO:/SEU_DIRETORIO_REMOTO` | `meugdrive:/Backups Servidor` |
 | `LABEL_SERVIDOR` | `Servidor` | `Servidor (Home)` |
 
@@ -672,13 +672,13 @@ O script detecta o modo automaticamente pelo nome do executável (`basename $0`)
 | Comando | Modo | Ícone | Diretório |
 |---------|------|-------|-----------|
 | `gdrive` | NORMAL | 📀 | Diretório padrão (`.../downloads/geral`) |
-| `gdrive-filme` | FILMES | 🎬 | Diretório de filmes (`.../downloads/filmes`) |
+| `gdrive-filmes` | filmes | 🎬 | Diretório de filmes (`.../downloads/filmes`) |
 | `gdrive-musicas` | MUSICAS | 🎵 | Diretório de músicas (`.../downloads/musicas`) |
 
 | Comando | Modo | Ícone | Diretório |
 |---------|------|-------|-----------|
 | `gdrive` | NORMAL | 📀 | Diretório padrão de downloads |
-| `gdrive-filmes` | FILMES | 🎬 | Diretório de filmes (exemplo) |
+| `gdrive-filmes` | filmes | 🎬 | Diretório de filmes (exemplo) |
 | `gdrive-backup` | BACKUP | �️ | Diretório de backups (exemplo) |
 
 Os modos adicionais são ativados via **symlinks** que apontam para o mesmo script `gdrive`. O nome do comando define qual configuração usar.
@@ -743,13 +743,13 @@ Cada flag usada está documentada abaixo. Apenas flags que melhoram a velocidade
 $ gdrive
 
 # Enviar um filme para a nuvem
-$ gdrive up "Filme.2024.1080p.BluRay.mkv"
+$ gdrive up "filme.2024.1080p.BluRay.mkv"
 
 # Enviar uma pasta inteira
 $ gdrive up "Serie Completa S01"
 
-# Upload no modo alternativo (ex: Filmes)
-$ gdrive-filme up "Filme_Legal_2024.mkv"
+# Upload no modo alternativo (ex: filmes)
+$ gdrive-filmes up "filme_Legal_2024.mkv"
 
 # Upload no modo alternativo (ex: Músicas)
 $ gdrive-musicas up "Album Completo.zip"
@@ -779,7 +779,7 @@ $ gdrive status
   ┌─ Operação ──────────────────────────────────────────────
   │  ▶ UPLOAD ⬆  (Arquivo)
   │
-  │  Origem :  📄 Servidor  →  Filme.2024.mkv
+  │  Origem :  📄 Servidor  →  filme.2024.mkv
   │  Destino:  ☁️  Google Drive
   │
   │  ⟫ Enviando arquivo para a nuvem...
@@ -814,7 +814,7 @@ $ gdrive status
 # Remover script e symlinks
 # Remover script e symlinks
 sudo rm /usr/local/bin/gdrive
-sudo rm /usr/local/bin/gdrive-filme
+sudo rm /usr/local/bin/gdrive-filmes
 sudo rm /usr/local/bin/gdrive-musicas
 
 # Remover repositório local (opcional)
