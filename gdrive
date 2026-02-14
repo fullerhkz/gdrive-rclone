@@ -151,40 +151,35 @@ separador() {
 }
 
 
+# ─────────────────────────────────────────────────────────────────────────
+# LARGURA DO PAINEL — Largura fixa do painel de operação (em colunas).
+# O painel sempre terá essa largura, independente do tamanho do terminal.
+# Ajuste esse valor se quiser um painel mais largo ou mais estreito.
+# ─────────────────────────────────────────────────────────────────────────
+LARGURA_PAINEL=76
 
 # ─────────────────────────────────────────────────────────────────────────
 # linha_painel(conteudo)
-#   Imprime uma linha dentro do painel com bordas │ esquerda e direita,
-#   preenchendo com espaços até a largura do terminal para fechar o
-#   retângulo visual. Usa strip ANSI para calcular largura real do texto.
+#   Imprime uma linha dentro do painel com bordas │ esquerda e direita.
+#   Usa escape ANSI \033[nG para posicionar o cursor na coluna exata
+#   da borda direita, independente da largura visual do conteúdo.
+#   Isso garante alinhamento perfeito mesmo com emojis e Unicode.
 #
 #   Parâmetros:
 #     $1 — Conteúdo da linha (pode conter códigos ANSI de cor)
 # ─────────────────────────────────────────────────────────────────────────
 linha_painel() {
     local conteudo="$1"
-    # Largura do terminal (fallback 80 colunas)
-    local cols
-    cols=$(tput cols 2>/dev/null || echo 80)
-    # Margem: 2 espaços + │ + espaço (esquerda) = 4 chars | espaço + │ (direita) = 2 chars
-    local largura_interna=$(( cols - 6 ))
-    # Remove códigos ANSI para calcular a largura visível real
-    local texto_limpo
-    texto_limpo=$(echo -e "$conteudo" | sed 's/\x1b\[[0-9;]*m//g')
-    local texto_len=${#texto_limpo}
-    # Calcula padding necessário para fechar a borda direita
-    local padding=$(( largura_interna - texto_len ))
-    if [[ $padding -lt 0 ]]; then padding=0; fi
-    printf -v espacos '%*s' "$padding" ''
-    echo -e "  ${BW}│${Z} ${conteudo}${espacos} ${BW}│${Z}"
+    # \033[${LARGURA_PAINEL}G move o cursor para a coluna LARGURA_PAINEL
+    # garantindo que a borda │ direita fique sempre alinhada
+    echo -e "  ${BW}│${Z} ${conteudo}${Z}\033[${LARGURA_PAINEL}G${BW}│${Z}"
 }
 
 # ─────────────────────────────────────────────────────────────────────────
 # info_operacao(acao, origem, destino, mensagem)
 #   Exibe um painel informativo antes de iniciar uma operação de
-#   transferência. Mostra a operação, origem, destino e uma mensagem
-#   de status. O painel se adapta à largura do terminal, fechando o
-#   retângulo com bordas │ na esquerda e direita.
+#   transferência. O painel tem largura fixa definida por LARGURA_PAINEL
+#   e usa posicionamento de cursor para alinhar as bordas perfeitamente.
 #
 #   Parâmetros:
 #     $1 — Nome da operação (ex: "UPLOAD", "DOWNLOAD")
@@ -198,22 +193,17 @@ info_operacao() {
     local destino="$3"
     local mensagem="$4"
 
-    # Largura do terminal (fallback 80 colunas)
-    local cols
-    cols=$(tput cols 2>/dev/null || echo 80)
-    # Largura interna do painel (sem as bordas laterais e margens)
-    local barra_len=$(( cols - 4 ))
+    # Calcula largura da barra horizontal (descontando margem + cantos)
+    local barra_len=$(( LARGURA_PAINEL - 4 ))
 
-    # Monta as barras superior e inferior dinamicamente
-    local barra_top barra_bot
-    printf -v barra_top '%*s' "$barra_len" ''
-    barra_top="${barra_top// /─}"
-    printf -v barra_bot '%*s' "$barra_len" ''
-    barra_bot="${barra_bot// /─}"
+    # Monta as barras superior e inferior
+    local barra
+    printf -v barra '%*s' "$barra_len" ''
+    barra="${barra// /─}"
 
-    # Substitui os primeiros caracteres da barra superior para o label
+    # Barra superior com label "Operação"
     local label="─ Operação "
-    barra_top="${label}${barra_top:${#label}}"
+    local barra_top="${label}${barra:${#label}}"
 
     echo -e "  ${BW}┌${barra_top}┐${Z}"
     linha_painel " ${BG}▶ $acao${Z}"
@@ -222,10 +212,9 @@ info_operacao() {
     linha_painel " ${BW}Destino:${Z}  $destino"
     linha_painel ""
     linha_painel " ${C}⟫ $mensagem${Z}"
-    echo -e "  ${BW}└${barra_bot}┘${Z}"
+    echo -e "  ${BW}└${barra}┘${Z}"
     echo ""
 }
-
 
 # ─────────────────────────────────────────────────────────────────────────
 # msg_sucesso()
