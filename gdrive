@@ -7,8 +7,8 @@
 # ║                                                                      ║
 # ║  MODOS DE OPERAÇÃO (detectados pelo nome do executável/symlink):     ║
 # ║    • gdrive           → Modo padrão  (DIRETORIO_1)                  ║
-# ║    • gdrive-MODO_2    → Modo 2       (DIRETORIO_2)                  ║
-# ║    • gdrive-MODO_3    → Modo 3       (DIRETORIO_3)                  ║
+# ║    • gdrive-filmes    → Modo Filmes  (DIRETORIO_2)                  ║
+# ║    • gdrive-backup    → Modo Backup  (DIRETORIO_3)                  ║
 # ║                                                                      ║
 # ║  USO:                                                                ║
 # ║    gdrive                    Baixar arquivos da nuvem → servidor     ║
@@ -18,8 +18,8 @@
 # ║                                                                      ║
 # ║  NOTA: Para os modos 2 e 3, crie symlinks apontando para este       ║
 # ║        script com o sufixo desejado:                                 ║
-# ║          ln -s /caminho/gdrive /caminho/gdrive-MODO_2               ║
-# ║          ln -s /caminho/gdrive /caminho/gdrive-MODO_3               ║
+# ║          ln -s /caminho/gdrive /caminho/gdrive-filmes               ║
+# ║          ln -s /caminho/gdrive /caminho/gdrive-backup               ║
 # ╚═══════════════════════════════════════════════════════════════════════╝
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -83,23 +83,23 @@ DIRETORIO_1="/home/SEU_USUARIO/SEU_DIRETORIO_1"
 #   Comando: gdrive
 
 # ─────────────────────────────────────────────────────────────────────────
-# DIRETÓRIO 2 — Modo alternativo (executando como "gdrive-MODO_2")
-#   Symlink: ln -s /usr/local/bin/gdrive /usr/local/bin/gdrive-MODO_2
+# DIRETÓRIO 2 — Modo alternativo (executando como "gdrive-filmes")
+#   Symlink: ln -s /usr/local/bin/gdrive /usr/local/bin/gdrive-filmes
 # ─────────────────────────────────────────────────────────────────────────
-DIRETORIO_2="/home/SEU_USUARIO/SEU_DIRETORIO_2"
-MODO_2_SUFIXO="MODO_2"       # Sufixo do symlink — altere conforme quiser
-MODO_2_LABEL="MODO 2"        # Nome exibido na interface
-MODO_2_ICONE="⚡"            # Ícone exibido na interface
+DIRETORIO_2="/home/SEU_USUARIO/SEU_DIRETORIO_FILMES"
+MODO_2_SUFIXO="filmes"       # Sufixo do comando (ex: gdrive-filmes)
+MODO_2_LABEL="FILMES"        # Nome exibido na interface
+MODO_2_ICONE="🎬"            # Ícone exibido na interface (opcional)
 MODO_2_COR="$BR"             # Cor do modo na interface
 
 # ─────────────────────────────────────────────────────────────────────────
-# DIRETÓRIO 3 — Modo alternativo (executando como "gdrive-MODO_3")
-#   Symlink: ln -s /usr/local/bin/gdrive /usr/local/bin/gdrive-MODO_3
+# DIRETÓRIO 3 — Modo alternativo (executando como "gdrive-backup")
+#   Symlink: ln -s /usr/local/bin/gdrive /usr/local/bin/gdrive-backup
 # ─────────────────────────────────────────────────────────────────────────
-DIRETORIO_3="/home/SEU_USUARIO/SEU_DIRETORIO_3"
-MODO_3_SUFIXO="MODO_3"       # Sufixo do symlink — altere conforme quiser
-MODO_3_LABEL="MODO 3"        # Nome exibido na interface
-MODO_3_ICONE="💎"            # Ícone exibido na interface
+DIRETORIO_3="/home/SEU_USUARIO/SEU_DIRETORIO_BACKUP"
+MODO_3_SUFIXO="backup"       # Sufixo do comando (ex: gdrive-backup)
+MODO_3_LABEL="BACKUP"        # Nome exibido na interface
+MODO_3_ICONE="🛡️"            # Ícone exibido na interface (opcional)
 MODO_3_COR="$BM"             # Cor do modo na interface
 
 # ─────────────────────────────────────────────────────────────────────────
