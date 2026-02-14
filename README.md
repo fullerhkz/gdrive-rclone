@@ -325,15 +325,18 @@ gdrive
 gdrive-filmes
 ```
 
-### 📤 Upload (Servidor → Nuvem)
+### 📤 Upload (Servidor → Google Drive)
 
-Para enviar arquivos ou pastas do servidor para o Google Drive, use o subcomando `up` seguido do nome do arquivo ou pasta. O item deve estar dentro do diretório local configurado para o modo ativo.
+Para enviar arquivos ou pastas do servidor para o Google Drive, use o subcomando `up`.
 
 ```bash
-# Enviar um arquivo para a nuvem
+# Enviar TUDO do diretório local para o Google Drive (Sincronização Completa)
+gdrive up
+
+# Enviar um arquivo específico
 gdrive up "Nome do Arquivo.mkv"
 
-# Enviar uma pasta inteira para a nuvem
+# Enviar uma pasta específica
 gdrive up "Nome da Pasta"
 
 # Upload usando um modo alternativo (ex: filmes)
@@ -685,15 +688,18 @@ gdrive
 gdrive-filmes
 ```
 
-### 📤 Upload (Servidor → Nuvem)
+### 📤 Upload (Servidor → Google Drive)
 
-Para enviar arquivos ou pastas do servidor para o Google Drive, use o subcomando `up` seguido do nome do arquivo ou pasta. O item deve estar dentro do diretório local configurado para o modo ativo.
+Para enviar arquivos ou pastas do servidor para o Google Drive, use o subcomando `up`.
 
 ```bash
-# Enviar um arquivo para a nuvem
+# Enviar TUDO do diretório local para o Google Drive (Sincronização Completa)
+gdrive up
+
+# Enviar um arquivo específico
 gdrive up "Nome do Arquivo.mkv"
 
-# Enviar uma pasta inteira para a nuvem
+# Enviar uma pasta específica
 gdrive up "Nome da Pasta"
 
 # Upload usando um modo alternativo (ex: filmes)
@@ -795,13 +801,16 @@ $ gdrive-filmes
 $ gdrive-musicas
 ```
 
-### Upload (Servidor → Nuvem)
+### Upload (Servidor → Google Drive)
 
 ```bash
-# Enviar um filme para a nuvem
+# Enviar TUDO do diretório local para o Google Drive
+$ gdrive up
+
+# Enviar um filme específico para o Google Drive
 $ gdrive up "filme.2024.1080p.BluRay.mkv"
 
-# Enviar uma pasta inteira
+# Enviar uma pasta específica
 $ gdrive up "Serie Completa S01"
 
 # Upload no modo alternativo (ex: filmes)

@@ -310,8 +310,9 @@ exibir_ajuda() {
     echo ""
     separador
     echo ""
-    echo -e "  ${BW}📤 UPLOAD (Servidor → Nuvem):${Z}"
-    echo -e "    ${BC}$CHAMADA up \"arquivo ou pasta\"${Z}   ${DIM}# Envia arquivo/pasta para o Google Drive${Z}"
+    echo -e "  ${BW}📤 UPLOAD (Servidor → Google Drive):${Z}"
+    echo -e "    ${BC}$CHAMADA up${Z}                       ${DIM}# Envia todo o conteúdo local para o Google Drive${Z}"
+    echo -e "    ${BC}$CHAMADA up \"arquivo ou pasta\"${Z}   ${DIM}# Envia arquivo/pasta específico${Z}"
     echo ""
     echo -e "  ${DIM}O item deve estar dentro do diretório local configurado para o modo ativo.${Z}"
     echo ""
@@ -342,10 +343,13 @@ exibir_ajuda() {
     echo -e "    ${C}# Baixar no modo $MODO_2_SUFIXO (via symlink)${Z}"
     echo -e "    ${BC}\$ gdrive-$MODO_2_SUFIXO${Z}"
     echo ""
-    echo -e "    ${C}# Enviar um arquivo para a nuvem${Z}"
+    echo -e "    ${C}# Enviar TUDO do diretório local para o Google Drive${Z}"
+    echo -e "    ${BC}\$ gdrive up${Z}"
+    echo ""
+    echo -e "    ${C}# Enviar um arquivo específico${Z}"
     echo -e "    ${BC}\$ gdrive up \"Filme.2024.1080p.mkv\"${Z}"
     echo ""
-    echo -e "    ${C}# Enviar uma pasta inteira para a nuvem${Z}"
+    echo -e "    ${C}# Enviar uma pasta específica${Z}"
     echo -e "    ${BC}\$ gdrive up \"Nome da Pasta\"${Z}"
     echo ""
     echo -e "    ${C}# Upload no modo $MODO_3_SUFIXO (via symlink)${Z}"
@@ -452,18 +456,19 @@ RCLONE_FLAGS=(
 # ─────────────────────────────────────────────────────────────────────────
 
 if [[ "$1" == "up" ]]; then
-    # ── MODO UPLOAD: Servidor → Nuvem ────────────────────────────────
-    # Requer um segundo argumento com o nome do arquivo ou diretório.
+    # ── MODO UPLOAD: Servidor → Google Drive ─────────────────────────
+    # Se não houver segundo argumento, faz upload de TODO o diretório local.
 
     if [[ -z "$2" ]]; then
-        # Sem argumento: exibe aviso de uso correto e sai
-        echo -e "  ${BY}⚠  Atenção:${Z} Você precisa especificar o arquivo ou pasta para upload."
-        echo ""
-        echo -e "  ${BW}Exemplo:${Z}"
-        echo -e "    ${BC}$CHAMADA up \"Nome do Arquivo.mkv\"${Z}"
-        echo -e "    ${BC}$CHAMADA up \"Nome da Pasta\"${Z}"
-        echo ""
-        exit 1
+        # Sem argumento: Upload completo (Servidor -> Google Drive)
+        info_operacao "UPLOAD ⬆  (Sincronização)" \
+                      "📂 $LABEL_SERVIDOR  →  ${BY}$DIRETORIO_LOCAL${Z}" \
+                      "☁️  $LABEL_REMOTO" \
+                      "Enviando TODO conteúdo do servidor para o Google Drive..."
+
+        rclone copy "$DIRETORIO_LOCAL/" "$REMOTE_PATH/" "${RCLONE_FLAGS[@]}"
+        msg_sucesso
+        exit 0
     fi
 
     # Constrói o caminho completo do item local
@@ -481,7 +486,7 @@ if [[ "$1" == "up" ]]; then
         info_operacao "UPLOAD ⬆  (Diretório)" \
                       "📂 $LABEL_SERVIDOR  →  ${BY}$2${Z}" \
                       "☁️  $LABEL_REMOTO" \
-                      "Enviando diretório para a nuvem..."
+                      "Enviando diretório para o Google Drive..."
 
         rclone copy "$LOCAL_ITEM" "$REMOTE_PATH/$2" "${RCLONE_FLAGS[@]}"
     else
@@ -491,7 +496,7 @@ if [[ "$1" == "up" ]]; then
         info_operacao "UPLOAD ⬆  (Arquivo)" \
                       "📄 $LABEL_SERVIDOR  →  ${BY}$2${Z}" \
                       "☁️  $LABEL_REMOTO" \
-                      "Enviando arquivo para a nuvem..."
+                      "Enviando arquivo para o Google Drive..."
 
         rclone copy "$LOCAL_ITEM" "$REMOTE_PATH/" --include "$2" "${RCLONE_FLAGS[@]}"
     fi
@@ -500,13 +505,13 @@ if [[ "$1" == "up" ]]; then
     msg_sucesso
 
 else
-    # ── MODO DOWNLOAD (padrão): Nuvem → Servidor ────────────────────
+    # ── MODO DOWNLOAD (padrão): Google Drive → Servidor ─────────────
     # Sem argumentos (ou argumento diferente de "up"/"help"/"status"),
     # baixa todo o conteúdo do remoto para o diretório local.
     info_operacao "DOWNLOAD ⬇  (Sincronização)" \
                   "☁️  $LABEL_REMOTO" \
                   "📂 $LABEL_SERVIDOR  →  ${BY}$DIRETORIO_LOCAL${Z}" \
-                  "Baixando arquivos da nuvem para o servidor..."
+                  "Baixando arquivos do Google Drive para o servidor..."
 
     rclone copy "$REMOTE_PATH/" "$DIRETORIO_LOCAL/" "${RCLONE_FLAGS[@]}"
 
