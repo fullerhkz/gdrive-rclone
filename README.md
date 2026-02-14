@@ -14,7 +14,9 @@ Script unificado para sincronização de arquivos entre um servidor Linux e o Go
 - [Funcionalidades](#-funcionalidades)
 - [Pré-requisitos](#-pré-requisitos)
 - [Instalação](#-instalação)
-- [Configuração](#-configuração)
+- [Configurando o rclone](#-configurando-o-rclone)
+- [Google Drive API — Client ID próprio](#-google-drive-api--client-id-próprio)
+- [Configuração do Script](#-configuração-do-script)
 - [Uso](#-uso)
 - [Modos de Operação](#-modos-de-operação)
 - [Fluxo de Execução](#-fluxo-de-execução)
@@ -41,13 +43,12 @@ Script unificado para sincronização de arquivos entre um servidor Linux e o Go
 
 - **Linux** com Bash 4.0+
 - **rclone** instalado e configurado com um remoto Google Drive
-  ```bash
-  # Instalar rclone
-  curl https://rclone.org/install.sh | sudo bash
 
-  # Configurar remoto (siga o assistente interativo)
-  rclone config
-  ```
+### Instalar o rclone
+
+```bash
+curl https://rclone.org/install.sh | sudo bash
+```
 
 ---
 
@@ -70,7 +71,95 @@ sudo ln -s /usr/local/bin/gdrive /usr/local/bin/gdrive-perma
 
 ---
 
-## ⚙️ Configuração
+## 🔗 Configurando o rclone
+
+O rclone armazena suas configurações (remotos, tokens, credenciais) no arquivo `rclone.conf`. Siga os passos abaixo para configurá-lo:
+
+### 1. Crie o diretório de configuração
+
+```bash
+mkdir -p ~/.config/rclone/
+```
+
+### 2. Configure um remoto Google Drive
+
+Se você está configurando o rclone pela primeira vez, execute o assistente interativo:
+
+```bash
+rclone config
+```
+
+Isso criará automaticamente o arquivo `~/.config/rclone/rclone.conf` com as credenciais do remoto.
+
+### 3. Ou copie um `rclone.conf` existente
+
+Se você já possui um `rclone.conf` configurado (ex: de outra máquina), basta copiá-lo para o diretório:
+
+```bash
+cp /caminho/do/seu/rclone.conf ~/.config/rclone/rclone.conf
+```
+
+### 4. Verifique a configuração
+
+```bash
+# Lista os remotos configurados
+rclone listremotes
+
+# Testa a conexão com o remoto
+rclone lsd SEU_REMOTO:
+```
+
+> [!NOTE]
+> O caminho padrão do `rclone.conf` é `~/.config/rclone/rclone.conf`. Você pode verificar o caminho usado com `rclone config file`.
+
+---
+
+## 🔑 Google Drive API — Client ID próprio
+
+Por padrão, o rclone usa um **Client ID compartilhado** da Google Drive API para autenticação. Como esse Client ID é usado por todos os usuários do rclone ao redor do mundo, o Google impõe **limites de taxa (rate limits)** que podem causar:
+
+- Transferências lentas
+- Erros `403 Rate Limit Exceeded` ou `429 Too Many Requests`
+- Throttling nas velocidades de upload/download
+
+### Como resolver: criar seu próprio Client ID
+
+Ao criar seu próprio **OAuth Client ID** no **Google Cloud Console**, você recebe uma cota dedicada exclusivamente para sua conta, o que resulta em:
+
+- ✅ **Maior velocidade** de transferência
+- ✅ **Sem compartilhamento** de limites com outros usuários
+- ✅ **Menos erros** de rate limiting
+- ✅ **Cota própria** da Google Drive API (padrão: 20.000 queries/100s por projeto)
+
+> [!IMPORTANT]
+> A documentação oficial do rclone **recomenda fortemente** que todos os usuários criem seu próprio Client ID. O processo é gratuito e leva poucos minutos.
+
+### Passo a passo
+
+Siga o guia oficial do rclone para criar seu Client ID e Client Secret:
+
+🔗 **[rclone — Making your own client_id](https://rclone.org/drive/#making-your-own-client-id)**
+
+Resumo dos passos:
+
+1. Acesse o [Google Cloud Console](https://console.cloud.google.com/)
+2. Crie (ou selecione) um **Projeto**
+3. Ative a **Google Drive API** no projeto
+4. Crie credenciais do tipo **OAuth 2.0 Client ID** (tipo: Desktop App)
+5. Copie o `client_id` e `client_secret` gerados
+6. Use-os ao configurar o remoto no rclone:
+
+```bash
+rclone config
+# Quando solicitado, informe seu client_id e client_secret
+```
+
+> [!TIP]
+> Após configurar com seu próprio Client ID, as flags de alta performance deste script (`--transfers=16`, `--drive-chunk-size=128M`) poderão operar na capacidade máxima sem sofrer throttling.
+
+---
+
+## ⚙️ Configuração do Script
 
 > [!CAUTION]
 > Antes de usar, você **DEVE** editar as variáveis no início do script com seus valores reais. O script não funcionará com os placeholders padrão.
@@ -239,6 +328,7 @@ $ gdrive status
 | Sem cores no terminal | Terminal não suporta ANSI 256-color | Use um terminal moderno (ex: `xterm-256color`) |
 | Erro de permissão | Script executado sem `chmod +x` | `chmod +x /usr/local/bin/gdrive` |
 | Upload lento | Chunk size muito pequeno ou instabilidade | Verifique `gdrive status` e ajuste `--drive-chunk-size` |
+| `403 Rate Limit Exceeded` | Usando o Client ID compartilhado do rclone | Crie seu próprio Client ID — veja [Google Drive API](#-google-drive-api--client-id-próprio) |
 | Muita RAM usada | 128M × 16 transfers = ~2GB | Reduza `--transfers` ou `--drive-chunk-size` |
 
 ---
